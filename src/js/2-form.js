@@ -1,48 +1,40 @@
 const STORAGE_KEY = 'feedback-form-state';
 
 const form = document.querySelector('.feedback-form');
+const input = form.querySelector('input');
 const textarea = form.querySelector('textarea');
-const emailInput = form.querySelector('input[name="email"]');
-const messageInput = form.querySelector('textarea[name="message"]');
 
+form.addEventListener('input', onInputData);
 form.addEventListener('submit', onFormSubmit);
-textarea.addEventListener('input', onTextareaInput);
-emailInput.addEventListener('input', onInputData);
-messageInput.addEventListener('input', onInputData);
 
-let formData = loadFormDataFromStorage();
-
-function loadFormDataFromStorage() {
-  const savedData = localStorage.getItem(STORAGE_KEY);
-  return savedData ? JSON.parse(savedData) : {};
-}
-
-function saveFormDataToStorage(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-function onTextareaInput(event) {
-  const { name, value } = event.target;
-  formData[name] = value.trim();
-  saveFormDataToStorage(formData);
-}
+let dataForm = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+const { email, message } = form.elements;
+savedPage();
 
 function onInputData(event) {
-  const { name, value } = event.target;
-  formData[name] = value.trim();
-  saveFormDataToStorage(formData);
+  dataForm = {
+    email: form.elements.email.value.trim(),
+    message: form.elements.message.value.trim(),
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(dataForm));
+}
+
+function savedPage() {
+  if (dataForm) {
+    email.value = dataForm.email || '';
+    message.value = dataForm.message || '';
+  }
 }
 
 function onFormSubmit(event) {
   event.preventDefault();
-  const { email, message } = formData;
+  console.log({ email: email.value, message: message.value });
 
-  if (!email || !message) {
-    return alert('Будь ласка, заповніть обидва поля.');
+  if (email.value === '' || message.value === '') {
+    return alert(`Будь ласка, заповніть обидва поля.`);
   }
 
-  console.log({ email, message });
   localStorage.removeItem(STORAGE_KEY);
-  form.reset();
-  formData = {};
+  event.currentTarget.reset();
+  dataForm = {};
 }
